@@ -2,52 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gradle Build GUI</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="/static/main.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <h1>Gradle Build GUI</h1>
 
-    <div class="card">
-      <label for="dirInput">Project root directory</label>
-      <div class="row">
-        <input id="dirInput" type="text" placeholder="D:\Multiplayer Network\portalplugin">
-        <span id="statusIcon" class="icon idle" title="Idle"></span>
-      </div>
-      <small class="hint">Must contain build.gradle or build.gradle.kts</small>
-      <div id="repoInfo" class="repo"></div>
-    </div>
+    <label for="project_root">Project root</label>
+    <input id="project_root" type="text" placeholder="C:\path\to\project or /path/to/project">
+    <button id="check_btn">Check</button>
 
-    <div class="card actions">
-      <button id="runBtn" disabled>Run build</button>
-      <button id="sendBtn" disabled>Send prompt to ChatGPT API</button>
-      <select id="modelSelect" title="Model">
-        <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
-        <option value="gpt-4o">gpt-4o</option>
-        <option value="gpt-4o-mini">gpt-4o-mini</option>
-        <option value="o3-mini">o3-mini</option>
-      </select>
-    </div>
+    <div id="status" class="status unknown">Status: Unknown</div>
 
-    <div class="card">
-      <h2>Build Output</h2>
-      <pre id="output"></pre>
-      <div id="downloads" class="downloads"></div>
-    </div>
+    <button id="run_btn">Run Build</button>
 
-    <div class="card">
-      <h2>Prompt Preview</h2>
-      <pre id="promptPreview" class="mono small"></pre>
-    </div>
+    <h2>Prompt</h2>
+    <pre id="prompt_note">Prompt file path will appear after a failed build.</pre>
 
-    <div class="card">
-      <h2>ChatGPT Response</h2>
-      <pre id="llmOutput" class="mono"></pre>
-    </div>
+    <h2>OpenAI Result</h2>
+    <pre id="result"></pre>
+
+    <h2>Actions</h2>
+    <pre id="actions"></pre>
+
+    <h2>Logs</h2>
+    <pre id="logs"></pre>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script>
+    const $ = (s)=>document.querySelector(s);
+    const projectRoot = $("#project_root");
+    const statusEl = $("#status");
+    const resultEl = $("#result");
+    const actionsEl = $("#actions");
+    const logsEl = $("#logs");
+    const promptNote = $("#prompt_note");
+
+    document.getElementById("check_btn").onclick = async ()=>{
+      const r = await fetch("/api/check",{method:"POST",headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({project_root: projectRoot.value})});
+      const j = await r.json();
+      statusEl.className = "status " + (j.has_build_file ? "ok" : "bad");
+      statusEl.textContent = "Status: " + (j.has_build_file ? "build file found" : "build file NOT found");
+    };
+
+    document.getElementById("run_btn").onclick = async ()=>{
+      resultEl.textContent = "";
+      actionsEl.textContent = "";
+      logsEl.textContent = "";
+      promptNote.textContent = "Running build...";
+
+      const r = await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({project_root: projectRoot.value})});
+      const j = await r.json();
+
+      if (!j.ok) {
+        resultEl.textContent = JSON.stringify(j, null, 2);
+        if (j.log_file) logsEl.textContent = "Log: " + j.log_file;
+        if (j.prompt_file) promptNote.textContent = "Prompt saved at: " + j.prompt_file;
+        return;
+      }
+
+      if (j.status === "success") {
+        statusEl.className = "status ok";
+        statusEl.textContent = "Status: build succeeded";
+        logsEl.textContent = "Log: " + j.log_file;
+        promptNote.textContent = "No prompt generated (success).";
+        return;
+      }
+
+      // Patch applied or validated
+      resultEl.textContent = JSON.stringify(j.spec, null, 2);
+      actionsEl.textContent = (j.actions || []).join("\n");
+      if (j.commands && j.commands.length) {
+        actionsEl.textContent += "\n\nCommands:\n" + j.commands.map(c => c.cmd + " -> rc=" + c.returncode).join("\n");
+      }
+      if (j.log_file) logsEl.textContent = "Log: " + j.log_file;
+      if (j.prompt_file) promptNote.textContent = "Prompt saved at: " + j.prompt_file;
+    };
+  </script>
 </body>
 </html>
