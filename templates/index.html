@@ -10,11 +10,13 @@
   <div class="wrap">
     <h1>Gradle Build GUI</h1>
 
-    <label for="project_root">Project root</label>
-    <input id="project_root" type="text" placeholder="C:\path\to\project or /path/to/project">
+    <label for="project_root">Project root or any path inside the project</label>
+    <input id="project_root" type="text" placeholder="C:\repo or /home/user/repo">
     <button id="check_btn">Check</button>
 
     <div id="status" class="status unknown">Status: Unknown</div>
+    <div id="resolved"></div>
+    <div id="gradle_root"></div>
 
     <button id="run_btn">Run Build</button>
 
@@ -35,52 +37,71 @@
     const $ = (s)=>document.querySelector(s);
     const projectRoot = $("#project_root");
     const statusEl = $("#status");
+    const resolvedEl = $("#resolved");
+    const gradleRootEl = $("#gradle_root");
     const resultEl = $("#result");
     const actionsEl = $("#actions");
     const logsEl = $("#logs");
     const promptNote = $("#prompt_note");
 
-    document.getElementById("check_btn").onclick = async ()=>{
-      const r = await fetch("/api/check",{method:"POST",headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({project_root: projectRoot.value})});
+    async function post(url, body) {
+      const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
       const j = await r.json();
-      statusEl.className = "status " + (j.has_build_file ? "ok" : "bad");
-      statusEl.textContent = "Status: " + (j.has_build_file ? "build file found" : "build file NOT found");
+      if (!r.ok) throw j;
+      return j;
+    }
+
+    $("#check_btn").onclick = async ()=>{
+      statusEl.className = "status unknown";
+      statusEl.textContent = "Status: checking...";
+      try {
+        const j = await post("/api/check", {project_root: projectRoot.value});
+        statusEl.className = "status " + (j.ok ? "ok" : "bad");
+        statusEl.textContent = "Status: " + (j.ok ? "build file found" : "build file NOT found");
+        resolvedEl.textContent = "Input resolved to: " + j.resolved_path;
+        gradleRootEl.textContent = "Gradle root: " + (j.gradle_root || "(not found)") + (j.reason ? " ["+j.reason+"]" : "");
+        if (j.ok && j.gradle_root) {
+          projectRoot.value = j.gradle_root; // auto-correct field to discovered root
+        }
+      } catch (e) {
+        statusEl.className = "status bad";
+        statusEl.textContent = "Status: error";
+        resolvedEl.textContent = JSON.stringify(e, null, 2);
+      }
     };
 
-    document.getElementById("run_btn").onclick = async ()=>{
+    $("#run_btn").onclick = async ()=>{
       resultEl.textContent = "";
       actionsEl.textContent = "";
       logsEl.textContent = "";
       promptNote.textContent = "Running build...";
 
-      const r = await fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({project_root: projectRoot.value})});
-      const j = await r.json();
-
-      if (!j.ok) {
-        resultEl.textContent = JSON.stringify(j, null, 2);
+      try {
+        const j = await post("/api/run", {project_root: projectRoot.value});
+        if (j.status === "success") {
+          statusEl.className = "status ok";
+          statusEl.textContent = "Status: build succeeded";
+          logsEl.textContent = "Log: " + j.log_file;
+          gradleRootEl.textContent = "Gradle root: " + j.gradle_root;
+          promptNote.textContent = "No prompt generated (success).";
+          return;
+        }
+        // Patch applied or validated
+        statusEl.className = "status bad";
+        statusEl.textContent = "Status: build failed, patch generated";
+        resultEl.textContent = JSON.stringify(j.spec, null, 2);
+        actionsEl.textContent = (j.actions || []).join("\n");
+        if (j.commands && j.commands.length) {
+          actionsEl.textContent += "\n\nCommands:\n" + j.commands.map(c => c.cmd + " -> rc=" + c.returncode).join("\n");
+        }
         if (j.log_file) logsEl.textContent = "Log: " + j.log_file;
         if (j.prompt_file) promptNote.textContent = "Prompt saved at: " + j.prompt_file;
-        return;
+        if (j.gradle_root) gradleRootEl.textContent = "Gradle root: " + j.gradle_root;
+      } catch (e) {
+        statusEl.className = "status bad";
+        statusEl.textContent = "Status: run error";
+        resultEl.textContent = JSON.stringify(e, null, 2);
       }
-
-      if (j.status === "success") {
-        statusEl.className = "status ok";
-        statusEl.textContent = "Status: build succeeded";
-        logsEl.textContent = "Log: " + j.log_file;
-        promptNote.textContent = "No prompt generated (success).";
-        return;
-      }
-
-      // Patch applied or validated
-      resultEl.textContent = JSON.stringify(j.spec, null, 2);
-      actionsEl.textContent = (j.actions || []).join("\n");
-      if (j.commands && j.commands.length) {
-        actionsEl.textContent += "\n\nCommands:\n" + j.commands.map(c => c.cmd + " -> rc=" + c.returncode).join("\n");
-      }
-      if (j.log_file) logsEl.textContent = "Log: " + j.log_file;
-      if (j.prompt_file) promptNote.textContent = "Prompt saved at: " + j.prompt_file;
     };
   </script>
 </body>

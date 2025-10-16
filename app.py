@@ -9,7 +9,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 from jsonschema import validate, Draft7Validator, ValidationError
 
-# ---- Configuration ----
 APP_ROOT = Path(__file__).parent.resolve()
 LOGS_DIR = (APP_ROOT / "logs"); LOGS_DIR.mkdir(exist_ok=True, parents=True)
 PROMPTS_DIR = (APP_ROOT / "prompts"); PROMPTS_DIR.mkdir(exist_ok=True, parents=True)
@@ -48,13 +47,77 @@ JSON_SCHEMA_V1 = {
     "additionalProperties": False
 }
 
-# Optional: allow users to disable applying changes for safety
 APPLY_CHANGES = os.environ.get("APPLY_CHANGES", "1") not in ("0", "false", "False")
 
 app = Flask(__name__, static_folder=str(STATIC_DIR), template_folder=str(TEMPLATES_DIR))
 
-def is_gradle_project(root: Path) -> bool:
-    return (root / "build.gradle").exists() or (root / "build.gradle.kts").exists()
+# ----------------- Gradle root discovery -----------------
+GRADLE_FILES = ("build.gradle", "build.gradle.kts")
+SETTINGS_FILES = ("settings.gradle", "settings.gradle.kts")
+
+def _clean_path(s: str) -> Path:
+    """Trim quotes/whitespace, expand ~, resolve."""
+    if not s:
+        return Path("")
+    s = s.strip().strip('"').strip("'")
+    p = Path(s).expanduser()
+    try:
+        return p.resolve()
+    except Exception:
+        return p
+
+def _has_build_files(p: Path) -> bool:
+    return any((p / f).exists() for f in GRADLE_FILES)
+
+def _has_settings_files(p: Path) -> bool:
+    return any((p / f).exists() for f in SETTINGS_FILES)
+
+def find_gradle_root(user_input: str) -> tuple[Path | None, str]:
+    """
+    Returns (gradle_root_or_None, reason).
+    Strategy:
+      1) Normalize input. If file -> parent.
+      2) Check that dir.
+      3) Walk up parents until drive root for settings/build files.
+      4) Shallow scan children (max_depth=2) for build files as module roots.
+    """
+    p = _clean_path(user_input)
+    if not p.exists():
+        return None, f"path does not exist: {p}"
+
+    if p.is_file():
+        p = p.parent
+
+    # 2) Direct hit
+    if _has_build_files(p):
+        return p, "found build file in provided directory"
+
+    # 3) Walk up to find a typical multi-module root (settings.*)
+    cur = p
+    while True:
+        if _has_settings_files(cur) or _has_build_files(cur):
+            return cur, "found settings/build file in a parent"
+        if cur.parent == cur:
+            break
+        cur = cur.parent
+
+    # 4) Shallow scan children to handle “project entered at repo root but gradle is under subdir”
+    # limit depth to avoid heavy scans
+    try:
+        for child in p.iterdir():
+            if not child.is_dir():
+                continue
+            # depth 1
+            if _has_build_files(child) or _has_settings_files(child):
+                return child, f"found gradle files under {child.name}"
+            # depth 2
+            for g in child.iterdir():
+                if g.is_dir() and (_has_build_files(g) or _has_settings_files(g)):
+                    return g, f"found gradle files under {child.name}/{g.name}"
+    except PermissionError:
+        pass
+
+    return None, "no gradle files found nearby"
 
 def detect_repo_url(root: Path) -> str | None:
     cfg = root / ".git" / "config"
@@ -71,13 +134,11 @@ def detect_repo_url(root: Path) -> str | None:
     return None
 
 def run_gradle(root: Path) -> tuple[int, str]:
-    # Prefer wrapper
     gradlew = "gradlew.bat" if os.name == "nt" else "gradlew"
     cmd = [str(root / gradlew), "clean", "build"] if (root / gradlew).exists() else ["gradle", "clean", "build"]
     try:
         proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
-        out = proc.stdout + "\n\n" + proc.stderr
-        return proc.returncode, out
+        return proc.returncode, proc.stdout + "\n\n" + proc.stderr
     except FileNotFoundError:
         return 127, "Gradle not found. Ensure gradle is on PATH or include a gradle wrapper.\n"
     except Exception as e:
@@ -86,8 +147,7 @@ def run_gradle(root: Path) -> tuple[int, str]:
 def write_file(target: Path, content: str, encoding: str = "utf-8"):
     target.parent.mkdir(parents=True, exist_ok=True)
     if encoding == "base64":
-        data = base64.b64decode(content)
-        target.write_bytes(data)
+        target.write_bytes(base64.b64decode(content))
     else:
         target.write_text(content, encoding="utf-8", newline="\n")
 
@@ -97,35 +157,26 @@ def apply_patch_spec(root: Path, spec: dict) -> list[str]:
     errors = sorted(validator.iter_errors(spec), key=lambda e: e.path)
     if errors:
         raise ValidationError("\n".join([f"{'/'.join(map(str, e.path))}: {e.message}" for e in errors]))
-
     for change in spec["changes"]:
         action = change["action"]
         path = change["path"]
         target = (root / path).resolve()
         if not str(target).startswith(str(root.resolve())):
             raise ValueError(f"Unsafe path outside project: {path}")
-
         if action in ("write", "create"):
-            content = change["content"]
-            encoding = change.get("encoding", "utf-8")
-            if APPLY_CHANGES:
-                write_file(target, content, encoding)
+            write_file(target, change["content"], change.get("encoding", "utf-8"))
             actions_log.append(f"{action.upper()} {path}")
         elif action == "delete":
-            if APPLY_CHANGES and target.exists():
-                if target.is_dir():
-                    shutil.rmtree(target)
-                else:
-                    target.unlink()
+            if target.exists():
+                shutil.rmtree(target) if target.is_dir() else target.unlink()
             actions_log.append(f"DELETE {path}")
         elif action == "move":
             src = (root / change["from"]).resolve()
             dst = (root / change["to"]).resolve()
             if not str(src).startswith(str(root.resolve())) or not str(dst).startswith(str(root.resolve())):
                 raise ValueError("Unsafe move path outside project")
-            if APPLY_CHANGES:
-                dst.parent.mkdir(parents=True, exist_ok=True)
-                shutil.move(str(src), str(dst))
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dst))
             actions_log.append(f"MOVE {change['from']} -> {change['to']}")
         else:
             raise ValueError(f"Unknown action: {action}")
@@ -139,75 +190,68 @@ def build_prompt(root: Path, build_output: str, repo_url: str | None) -> str:
         "Never include Markdown, code fences, or explanations. All modified or new files MUST be full-file contents. "
         "If no changes are needed, output {\"version\":\"1\",\"intent\":\"apply_fixes\",\"changes\":[]}."
     )
-    lines = [
+    return "\n".join([
         header,
         "",
-        f"Project root: {root}",
-        f"Gradle file present: {is_gradle_project(root)}",
+        f"Gradle root: {root}",
         f"Repository URL: {repo_url or 'unknown'}",
         "Constraints: Java 21 if present, minimal invasive changes, keep API surface stable.",
         "",
         "==== LAST BUILD OUTPUT BEGIN ====",
-        build_output.strip()[:300000],  # cap very large logs
+        build_output.strip()[:300000],
         "==== LAST BUILD OUTPUT END ====",
-    ]
-    return "\n".join(lines)
+    ])
 
 def call_openai_json(prompt: str) -> dict:
-    # Uses OpenAI "Responses" API with JSON response enforcement.
-    # Requires: pip install openai>=1.40
     from openai import OpenAI
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     resp = client.responses.create(
         model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-        input=[
-            {"role": "system", "content": "You are a strict JSON patch generator."},
-            {"role": "user", "content": prompt}
-        ],
+        input=[{"role": "system", "content": "You are a strict JSON patch generator."},
+               {"role": "user", "content": prompt}],
         response_format={"type": "json_object"},
         temperature=0
     )
-    # Support text or JSON output depending on SDK behavior
-    if resp.output and hasattr(resp.output[0], "content") and resp.output[0].content:
-        raw = resp.output_text
-    else:
-        # Fallback: attempt to read from top-level
-        raw = getattr(resp, "output_text", None) or ""
-    data = json.loads(raw)
-    return data
+    raw = getattr(resp, "output_text", None) or ""
+    return json.loads(raw)
 
 @app.route("/", methods=["GET"])
 def index():
     project_root = request.args.get("root", "")
-    exists = is_gradle_project(Path(project_root)) if project_root else False
-    return render_template("index.html", project_root=project_root, has_build_file=exists)
+    return render_template("index.html", project_root=project_root)
 
 @app.route("/api/check", methods=["POST"])
 def api_check():
     data = request.get_json(force=True)
-    root = Path(data.get("project_root", "")).resolve()
-    return jsonify({"ok": True, "has_build_file": is_gradle_project(root)})
+    user_path = data.get("project_root", "")
+    gradle_root, reason = find_gradle_root(user_path)
+    return jsonify({
+        "ok": gradle_root is not None,
+        "input": user_path,
+        "resolved_path": str(_clean_path(user_path)),
+        "gradle_root": str(gradle_root) if gradle_root else None,
+        "has_build_file": bool(gradle_root),
+        "reason": reason
+    })
 
 @app.route("/api/run", methods=["POST"])
 def api_run():
     data = request.get_json(force=True)
-    project_root = Path(data.get("project_root", "")).resolve()
-    if not project_root.exists():
-        return jsonify({"ok": False, "error": "Project root does not exist."}), 400
-    if not is_gradle_project(project_root):
-        return jsonify({"ok": False, "error": "No build.gradle or build.gradle.kts in project root."}), 400
+    user_path = data.get("project_root", "")
+    gradle_root, reason = find_gradle_root(user_path)
+    if not gradle_root:
+        return jsonify({"ok": False, "error": f"Gradle files not found. {reason}"}), 400
 
-    rc, out = run_gradle(project_root)
+    rc, out = run_gradle(gradle_root)
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     log_path = LOGS_DIR / f"build-{ts}.log"
     log_path.write_text(out, encoding="utf-8", newline="\n")
 
     if rc == 0:
-        return jsonify({"ok": True, "status": "success", "log_file": str(log_path)})
+        return jsonify({"ok": True, "status": "success", "log_file": str(log_path), "gradle_root": str(gradle_root)})
 
-    # Build failed -> craft prompt and call OpenAI
-    repo_url = detect_repo_url(project_root)
-    prompt = build_prompt(project_root, out, repo_url)
+    repo_url = detect_repo_url(gradle_root)
+    prompt = build_prompt(gradle_root, out, repo_url)
     prompt_path = PROMPTS_DIR / f"prompt-{ts}.txt"
     prompt_path.write_text(prompt, encoding="utf-8", newline="\n")
 
@@ -219,22 +263,16 @@ def api_run():
             "status": "openai_error",
             "error": str(e),
             "prompt_file": str(prompt_path),
-            "log_file": str(log_path)
+            "log_file": str(log_path),
+            "gradle_root": str(gradle_root)
         }), 500
 
-    # Validate and optionally apply
     try:
-        actions_log = []
-        if APPLY_CHANGES:
-            actions_log = apply_patch_spec(project_root, spec)
-        else:
-            # Validate only
-            validate(instance=spec, schema=JSON_SCHEMA_V1)
-        # Optional commands execution after apply
+        actions_log = apply_patch_spec(gradle_root, spec) if APPLY_CHANGES else []
         cmd_outs = []
         for cmd in spec.get("commands", []):
             try:
-                proc = subprocess.run(cmd, cwd=project_root, shell=True, capture_output=True, text=True)
+                proc = subprocess.run(cmd, cwd=gradle_root, shell=True, capture_output=True, text=True)
                 cmd_outs.append({"cmd": cmd, "returncode": proc.returncode, "output": (proc.stdout + "\n" + proc.stderr)})
             except Exception as e:
                 cmd_outs.append({"cmd": cmd, "returncode": 1, "output": f"Error: {e}"})
@@ -245,6 +283,7 @@ def api_run():
             "spec": spec,
             "prompt_file": str(prompt_path),
             "log_file": str(log_path),
+            "gradle_root": str(gradle_root),
             "commands": cmd_outs
         })
     except ValidationError as ve:
