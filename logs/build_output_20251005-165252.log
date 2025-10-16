@@ -1,0 +1,212 @@
+Initialized native services in: C:\Users\GGPC\.gradle\native
+Initialized jansi services in: C:\Users\GGPC\.gradle\native
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Starting process 'Gradle build daemon'. Working directory: C:\Users\GGPC\.gradle\daemon\8.14.3 Command: C:\Program Files\Eclipse Adoptium\jdk-17.0.5.8-hotspot\bin\java.exe --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED -XX:MaxMetaspaceSize=384m -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp D:\Gradle\gradle-8.14.3\lib\gradle-daemon-main-8.14.3.jar -javaagent:D:\Gradle\gradle-8.14.3\lib\agents\gradle-instrumentation-agent-8.14.3.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.14.3
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 1.627 secs.
+The client will now receive all logging from the daemon (pid: 125296). The daemon log file: C:\Users\GGPC\.gradle\daemon\8.14.3\daemon-125296.out.log
+Daemon will be stopped at the end of the build 
+Using 12 worker leases.
+Received JVM installation metadata from 'C:\Program Files\Eclipse Adoptium\jdk-17.0.5.8-hotspot': {JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.0.5.8-hotspot, JAVA_VERSION=17.0.5, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=17.0.5+8, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=17.0.5+8, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Watching the file system is configured to be enabled if available
+Now considering [D:\Multiplayer Network\portalplugin] as hierarchies to watch
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'D:\Multiplayer Network\portalplugin\settings.gradle'.
+Projects loaded. Root project using build file 'D:\Multiplayer Network\portalplugin\build.gradle'.
+Included projects: [root project 'PortalPlugin']
+
+> Configure project :
+Evaluating root project 'PortalPlugin' using build file 'D:\Multiplayer Network\portalplugin\build.gradle'.
+Resolved plugin [id: 'java']
+All projects evaluated.
+Task name matched 'build'
+Selected primary task 'build' from project :
+Starting process 'command 'C:\Program Files\Java\jdk-23\bin\java.exe''. Working directory: C:\Users\GGPC\.gradle\.tmp\tmp-jvm5065263166476046522probe Command: C:\Program Files\Java\jdk-23\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Java\jdk-23\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Java\jdk-23': {JAVA_HOME=C:\Program Files\Java\jdk-23, JAVA_VERSION=23.0.2, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=23.0.2+7-58, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=23.0.2+7-58, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+Starting process 'command 'C:\Program Files\Java\jdk-21\bin\java.exe''. Working directory: C:\Users\GGPC\.gradle\.tmp\tmp-jvm8368575956107716396probe Command: C:\Program Files\Java\jdk-21\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Java\jdk-21\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Java\jdk-21': {JAVA_HOME=C:\Program Files\Java\jdk-21, JAVA_VERSION=21.0.8, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=21.0.8+12-LTS-250, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=21.0.8+12-LTS-250, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+Starting process 'command 'C:\Program Files\Eclipse Adoptium\jdk-8.0.462.8-hotspot\bin\java.exe''. Working directory: C:\Users\GGPC\.gradle\.tmp\tmp-jvm16276122056025498011probe Command: C:\Program Files\Eclipse Adoptium\jdk-8.0.462.8-hotspot\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Eclipse Adoptium\jdk-8.0.462.8-hotspot\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Eclipse Adoptium\jdk-8.0.462.8-hotspot': {JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-8.0.462.8-hotspot\jre, JAVA_VERSION=1.8.0_462, JAVA_VENDOR=Temurin, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=1.8.0_462-b08, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=25.462-b08, VM_VENDOR=Temurin, OS_ARCH=amd64}
+Starting process 'command 'C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin\java.exe''. Working directory: C:\Users\GGPC\.gradle\.tmp\tmp-jvm2990674352556378197probe Command: C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot': {JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot, JAVA_VERSION=21.0.8, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.8+9-LTS, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.8+9-LTS, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Starting process 'command 'C:\Program Files\Java\jdk-16.0.2\bin\java.exe''. Working directory: C:\Users\GGPC\.gradle\.tmp\tmp-jvm7694197363082797028probe Command: C:\Program Files\Java\jdk-16.0.2\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Java\jdk-16.0.2\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Java\jdk-16.0.2': {JAVA_HOME=C:\Program Files\Java\jdk-16.0.2, JAVA_VERSION=16.0.2, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=16.0.2+7-67, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=16.0.2+7-67, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':jar', task ':assemble', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test', task ':check', task ':build']
+Tasks that were excluded: []
+Resolve mutations for :compileJava (Thread[Execution worker Thread 3,5,main]) started.
+:compileJava (Thread[included builds,5,main]) started.
+This JVM does not support getting OS memory, so no OS memory status updates will be broadcast
+
+> Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Task ':compileJava' is not up-to-date because:
+  Input property 'stableSources' file D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java has changed.
+Compilation mode: default, forking compiler
+Created classpath snapshot for incremental compilation in 0.113 secs.
+Compiling with toolchain 'C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot'.
+Starting process 'Gradle Worker Daemon 1'. Working directory: C:\Users\GGPC\.gradle\workers Command: C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin\java.exe --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED @C:\Users\GGPC\.gradle\.tmp\gradle-worker-classpath16916113671840755964txt -Xmx512m -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Worker Daemon 1'
+Successfully started process 'Gradle Worker Daemon 1'
+Started Gradle worker daemon (0.424 secs) with fork options DaemonForkOptions{executable=C:\Program Files\Eclipse Adoptium\jdk-21.0.8.9-hotspot\bin\java.exe, minHeapSize=null, maxHeapSize=null, jvmArgs=[--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED, --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED], keepAliveMode=DAEMON}.
+Compiling with JDK Java compiler API.
+D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:31: error: constructor GameStateManager in class GameStateManager cannot be applied to given types;
+        stateManager      = new GameStateManager(this, scoreboardManager, queueManager);
+                            ^
+  required: HubStatsPlugin,CustomScoreboardManager
+  found:    HubStatsPlugin,CustomScoreboardManager,GameQueueManager
+  reason: actual and formal argument lists differ in length
+D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:37: error: cannot find symbol
+            arenaManager.saveRedArena();
+                        ^
+  symbol:   method saveRedArena()
+  location: variable arenaManager of type ArenaManager
+D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:41: error: cannot find symbol
+            arenaManager.saveBlueArena();
+                        ^
+  symbol:   method saveBlueArena()
+  location: variable arenaManager of type ArenaManager
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+3 errors
+Incremental compilation of 15 classes completed in 2.052 secs.
+
+> Task :compileJava FAILED
+
+[Incubating] Problems report is available at: file:///D:/Multiplayer%20Network/portalplugin/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:31: error: constructor GameStateManager in class GameStateManager cannot be applied to given types;
+          stateManager      = new GameStateManager(this, scoreboardManager, queueManager);
+                              ^
+    required: HubStatsPlugin,CustomScoreboardManager
+    found:    HubStatsPlugin,CustomScoreboardManager,GameQueueManager
+    reason: actual and formal argument lists differ in length
+  3 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':compileJava'.
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:130)
+	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:293)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:128)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:46)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+Caused by: org.gradle.api.internal.tasks.compile.CompilationFailedException: Compilation failed; see the compiler output below.
+D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:31: error: constructor GameStateManager in class GameStateManager cannot be applied to given types;
+        stateManager      = new GameStateManager(this, scoreboardManager, queueManager);
+                            ^
+  required: HubStatsPlugin,CustomScoreboardManager
+  found:    HubStatsPlugin,CustomScoreboardManager,GameQueueManager
+  reason: actual and formal argument lists differ in length
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use or override a deprecated API.
+D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:37: error: cannot find symbol
+            arenaManager.saveRedArena();
+                        ^
+  symbol:   method saveRedArena()
+  location: variable arenaManager of type ArenaManager
+D:\Multiplayer Network\portalplugin\src\main\java\com\blake\portalplugin\HubStatsPlugin.java:41: error: cannot find symbol
+            arenaManager.saveBlueArena();
+                        ^
+  symbol:   method saveBlueArena()
+  location: variable arenaManager of type ArenaManager
+3 errors
+	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:89)
+	at org.gradle.api.internal.tasks.compile.JdkJavaCompiler.execute(JdkJavaCompiler.java:50)
+	at org.gradle.api.internal.tasks.compile.daemon.AbstractIsolatedCompilerWorkerExecutor$CompilerWorkAction.execute(AbstractIsolatedCompilerWorkerExecutor.java:78)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+	at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:54)
+	at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:48)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:48)
+	at org.gradle.workers.internal.FlatClassLoaderWorker.run(FlatClassLoaderWorker.java:32)
+	at org.gradle.workers.internal.FlatClassLoaderWorker.run(FlatClassLoaderWorker.java:22)
+	at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:108)
+	at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:77)
+	at org.gradle.process.internal.worker.request.WorkerAction.lambda$run$1(WorkerAction.java:150)
+	at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
+	at org.gradle.process.internal.worker.request.WorkerAction.lambda$run$2(WorkerAction.java:150)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:142)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+	at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
+	at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
+	at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+
+
+BUILD FAILED in 10s
+1 actionable task: 1 executed
+Watched directory hierarchies: [D:\Multiplayer Network\portalplugin]
