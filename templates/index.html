@@ -10,8 +10,8 @@
   <div class="wrap">
     <h1>Gradle Build GUI</h1>
 
-    <label for="project_root">Project root or any path inside the project</label>
-    <input id="project_root" type="text" placeholder="C:\repo or /home/user/repo">
+    <label for="project_root">Project root, any subfolder, or a path to build.gradle(.kts)</label>
+    <input id="project_root" type="text" placeholder="C:\repo or /home/user/repo or .../app/build.gradle">
     <button id="check_btn">Check</button>
 
     <div id="status" class="status unknown">Status: Unknown</div>
@@ -21,7 +21,7 @@
     <button id="run_btn">Run Build</button>
 
     <h2>Prompt</h2>
-    <pre id="prompt_note">Prompt file path will appear after a failed build.</pre>
+    <pre id="prompt_note">Prompt path appears here after a failed build.</pre>
 
     <h2>OpenAI Result</h2>
     <pre id="result"></pre>
@@ -61,7 +61,7 @@
         resolvedEl.textContent = "Input resolved to: " + j.resolved_path;
         gradleRootEl.textContent = "Gradle root: " + (j.gradle_root || "(not found)") + (j.reason ? " ["+j.reason+"]" : "");
         if (j.ok && j.gradle_root) {
-          projectRoot.value = j.gradle_root; // auto-correct field to discovered root
+          projectRoot.value = j.gradle_root; // normalize to discovered root
         }
       } catch (e) {
         statusEl.className = "status bad";
@@ -86,7 +86,6 @@
           promptNote.textContent = "No prompt generated (success).";
           return;
         }
-        // Patch applied or validated
         statusEl.className = "status bad";
         statusEl.textContent = "Status: build failed, patch generated";
         resultEl.textContent = JSON.stringify(j.spec, null, 2);

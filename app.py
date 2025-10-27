@@ -1,20 +1,24 @@
 import os
-import sys
 import json
 import base64
 import subprocess
 import shutil
 from pathlib import Path
 from datetime import datetime
+
 from flask import Flask, render_template, request, jsonify
-from jsonschema import validate, Draft7Validator, ValidationError
+from jsonschema import Draft7Validator, ValidationError
 
+# ---- Paths ----
 APP_ROOT = Path(__file__).parent.resolve()
-LOGS_DIR = (APP_ROOT / "logs"); LOGS_DIR.mkdir(exist_ok=True, parents=True)
-PROMPTS_DIR = (APP_ROOT / "prompts"); PROMPTS_DIR.mkdir(exist_ok=True, parents=True)
-STATIC_DIR = (APP_ROOT / "static"); STATIC_DIR.mkdir(exist_ok=True, parents=True)
-TEMPLATES_DIR = (APP_ROOT / "templates"); TEMPLATES_DIR.mkdir(exist_ok=True, parents=True)
+LOGS_DIR = APP_ROOT / "logs"
+PROMPTS_DIR = APP_ROOT / "prompts"
+STATIC_DIR = APP_ROOT / "static"
+TEMPLATES_DIR = APP_ROOT / "templates"
+for d in (LOGS_DIR, PROMPTS_DIR, STATIC_DIR, TEMPLATES_DIR):
+    d.mkdir(exist_ok=True, parents=True)
 
+# ---- JSON schema for model output ----
 JSON_SCHEMA_V1 = {
     "type": "object",
     "required": ["version", "intent", "changes"],
@@ -56,30 +60,27 @@ GRADLE_FILES = ("build.gradle", "build.gradle.kts")
 SETTINGS_FILES = ("settings.gradle", "settings.gradle.kts")
 
 def _clean_path(s: str) -> Path:
-    """Trim quotes/whitespace, expand ~, resolve."""
+    """Trim quotes/whitespace, expand ~, resolve (non-strict)."""
     if not s:
         return Path("")
     s = s.strip().strip('"').strip("'")
     p = Path(s).expanduser()
     try:
-        return p.resolve()
+        return p.resolve(strict=False)
     except Exception:
         return p
 
-def _has_build_files(p: Path) -> bool:
-    return any((p / f).exists() for f in GRADLE_FILES)
-
-def _has_settings_files(p: Path) -> bool:
-    return any((p / f).exists() for f in SETTINGS_FILES)
+def _has_any(p: Path, names: tuple[str, ...]) -> bool:
+    return any((p / n).exists() for n in names)
 
 def find_gradle_root(user_input: str) -> tuple[Path | None, str]:
     """
-    Returns (gradle_root_or_None, reason).
+    Accept directory OR file path anywhere inside a Gradle project.
     Strategy:
-      1) Normalize input. If file -> parent.
-      2) Check that dir.
-      3) Walk up parents until drive root for settings/build files.
-      4) Shallow scan children (max_depth=2) for build files as module roots.
+      1) Normalize. If a file path, use its parent.
+      2) Direct hit for build.* in that folder.
+      3) Walk up parents for settings.* or build.*.
+      4) Shallow scan children (depth <= 2) for multi-module roots.
     """
     p = _clean_path(user_input)
     if not p.exists():
@@ -89,36 +90,34 @@ def find_gradle_root(user_input: str) -> tuple[Path | None, str]:
         p = p.parent
 
     # 2) Direct hit
-    if _has_build_files(p):
+    if _has_any(p, GRADLE_FILES):
         return p, "found build file in provided directory"
 
-    # 3) Walk up to find a typical multi-module root (settings.*)
+    # 3) Walk up
     cur = p
     while True:
-        if _has_settings_files(cur) or _has_build_files(cur):
+        if _has_any(cur, SETTINGS_FILES) or _has_any(cur, GRADLE_FILES):
             return cur, "found settings/build file in a parent"
         if cur.parent == cur:
             break
         cur = cur.parent
 
-    # 4) Shallow scan children to handle “project entered at repo root but gradle is under subdir”
-    # limit depth to avoid heavy scans
+    # 4) Shallow scan children
     try:
         for child in p.iterdir():
             if not child.is_dir():
                 continue
-            # depth 1
-            if _has_build_files(child) or _has_settings_files(child):
+            if _has_any(child, GRADLE_FILES) or _has_any(child, SETTINGS_FILES):
                 return child, f"found gradle files under {child.name}"
-            # depth 2
             for g in child.iterdir():
-                if g.is_dir() and (_has_build_files(g) or _has_settings_files(g)):
+                if g.is_dir() and (_has_any(g, GRADLE_FILES) or _has_any(g, SETTINGS_FILES)):
                     return g, f"found gradle files under {child.name}/{g.name}"
     except PermissionError:
         pass
 
     return None, "no gradle files found nearby"
 
+# ----------------- Utilities -----------------
 def detect_repo_url(root: Path) -> str | None:
     cfg = root / ".git" / "config"
     if not cfg.exists():
@@ -203,6 +202,7 @@ def build_prompt(root: Path, build_output: str, repo_url: str | None) -> str:
     ])
 
 def call_openai_json(prompt: str) -> dict:
+    # Requires: pip install openai>=1.40
     from openai import OpenAI
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     resp = client.responses.create(
@@ -215,6 +215,7 @@ def call_openai_json(prompt: str) -> dict:
     raw = getattr(resp, "output_text", None) or ""
     return json.loads(raw)
 
+# ----------------- Routes -----------------
 @app.route("/", methods=["GET"])
 def index():
     project_root = request.args.get("root", "")
